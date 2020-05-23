@@ -1,29 +1,25 @@
-import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
-public class Generator extends Thread {
+public class Generator implements Runnable {
+    private final BlockingQueue<Student> queue;
 
-    public Generator(BlockingDeque<Student> students, int iterations) {
-        this.students = students;
-        this.iterations = iterations;
+    public Generator(BlockingQueue<Student> queue) {
+        this.queue = queue;
     }
-
-    public BlockingDeque<Student> students;
-    final private int iterations;
 
     @Override
     public void run() {
-
         try {
-            for (int i = 0; i < iterations; ++i) {
-                generateStudent();
+            for (int i = 0; i < 104; ++i) {
+                generateStudent(i);
             }
-            students.put(new Student("finish", 0));
+            queue.put(new Student(-1, "Generator finished", 0));
         } catch (InterruptedException | IllegalStateException e) {
             e.printStackTrace();
         }
     }
 
-    public void generateStudent() {
+    public void generateStudent(int i) {
         int labsCountRnd = (int) (Math.random() * 3);
         int subjectRnd = (int) (Math.random() * 3);
         int labsCount;
@@ -41,7 +37,7 @@ public class Generator extends Thread {
 
         switch (subjectRnd) {
             case 0:
-                subject = "Math";
+                subject = "HigherMath";
                 break;
             case 1:
                 subject = "OOP";
@@ -50,10 +46,14 @@ public class Generator extends Thread {
                 subject = "Physics";
                 break;
             default:
-                subject = "HigherMath";
+                throw new IllegalStateException("Unexpected value: " + subjectRnd);
         }
+
         try {
-            students.put(new Student(subject, labsCount));
+            Student student = new Student(i, subject, labsCount);
+            System.out.println("Student " + student.getId() + " in queues");
+            queue.put(student);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

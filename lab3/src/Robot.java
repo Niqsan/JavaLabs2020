@@ -1,36 +1,51 @@
-import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
-public class Robot extends Thread {
+public class Robot implements Runnable {
 
     private final String subject;
-    public BlockingDeque<Student> students;
+    public BlockingQueue<Student> queue;
 
-    public Robot(BlockingDeque<Student> students, String subject) {
-        this.students = students;
+    public Robot(BlockingQueue<Student> students, String subject) {
+        this.queue = students;
         this.subject = subject;
-        currentThread().setName(subject);
-
     }
 
     @Override
     public void run() {
-
         try {
             while (true) {
-                Student student = students.peek();
-                if (student != null && student.getSubject().equals(subject)) {
-                    student = students.take();
-                    System.out.println(subject + " teacher started verifying");
-                    while (student.getLabsCount() != 0) {
-                        System.out.println("Robot " + subject + " is working, " + student.getLabsCount() + " left");
-                        student.verifyLabs();
-                        sleep(1000);
+                Student student = queue.take();
+                if ((student.getLabsCount() != 0) ) {
+                    if (student.getSubject().equals(subject)) {
+                        student = queue.take();
+                        handle(student);
                     }
-                    System.out.println(subject + " teacher finished verifying");
+                } else {
+                    queue.put(new Student(-1, "Generator finished", 0));
+                    System.out.println("Robot" + subject + " ended");
+                    break;
                 }
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void handle(Student student) throws InterruptedException {
+        System.out.println("Student " + student.getId() +
+                " enters the" +
+                student.getSubject() +
+                " class with " +
+                student.getLabsCount() + " " +
+                student.getSubject() +
+                " labs");
+
+        for (int i = 0; i < student.getLabsCount() / 5; i++) {
+            System.out.println("Student " +
+                    student.getId() +
+                    " passed 5 laboratory works");
+        }
+        System.out.println("Student " + student.getId() + " done");
     }
 }

@@ -1,8 +1,10 @@
 public class Student {
     private final String subject;
     private int labsCount;
+    private final int id;
 
-    public Student (String subject, int labsCount) {
+    public Student (int id, String subject, int labsCount) {
+        this.id = id;
         this.subject = subject;
         this.labsCount = labsCount;
     }
@@ -13,6 +15,10 @@ public class Student {
 
     public int getLabsCount() {
         return labsCount;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void verifyLabs() {
